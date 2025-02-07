@@ -1,0 +1,9 @@
+# Name,     Type, SubType,  Offset, Size, Flags
+nvs,        data, nvs,      ,  0x6000,
+otadata,    data, ota,      ,  0x2000,
+phy_init,   data, phy,      ,  0x1000,
+zb_storage, data, fat,      ,  16K,
+zb_fct,     data, fat,      ,  1K,
+ota_0,      app,  ota_0,    ,  900K,
+ota_1,      app,  ota_1,    ,  900K,
+storage,    data, spiffs,   ,  50K,

@@ -1,0 +1,3 @@
+[submodule "components/bl09xx"]
+	path = components/bl09xx
+	url = git@github.com:alex-omk/bl09xx.git

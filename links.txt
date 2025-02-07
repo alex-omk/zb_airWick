@@ -1,0 +1,48 @@
+https://github.com/darkxst/silabs-firmware-builder/tree/main/firmware_builds/zbdonglee
+https://www.youtube.com/watch?v=gUtGoYhhkjE
+https://github.com/kvazis/training/tree/master/lessons/articles/Elelabs%20EFR32MG21%20update
+
+
+
+https://github.com/espressif/esp-idf/issues/10662
+
+https://github.com/espressif/esp-zigbee-sdk/issues/328
+
+https://github.com/espressif/esp-idf/issues/11943
+
+https://github.com/xmow49/ESP32H2-Zigbee-Demo/blob/main/main/esp_zb_light.c
+https://github.com/luar123/esphome_zb_sensor/blob/master/esp_zb_light.c
+
+https://community.home-assistant.io/t/esp32-h2-having-2-zigbee-endpoints/614489
+
+https://github.com/espressif/esp-zigbee-sdk/blob/796eb801a26f973f33a191d5aeb13966dabf10bf/examples/esp_zigbee_customized_devices/customized_server/main/esp_HA_customized_light.c
+
+https://github.com/espressif/esp-zigbee-sdk/issues/407
+https://github.com/espressif/esp-zigbee-sdk/issues/295
+https://github.com/espressif/esp-zigbee-sdk/issues/34
+http://esp32.io/viewtopic.php?t=34688
+
+# Zigbee OTA
+https://github.com/espressif/esp-zigbee-sdk/blob/main/examples/esp_zigbee_ota/ota_client/main/esp_ota_client.c
+https://github.com/lmahmutov/esp32_c6_co2_sensor/blob/main/main/esp_zigbee_co2.c#L474
+https://github.com/espressif/esp-zigbee-sdk/issues/146
+
+#Z2M OTA img index
+https://github.com/Koenkk/zigbee-OTA/blob/master/index.json
+
+#Z2M
+https://github.com/Koenkk/zigbee2mqtt.io/blob/master/docs/externalConvertersExample/switch.js
+https://gist.github.com/Koenkk/8e665bf0c40a5c39a9dda421e1ba4345
+https://github.com/Koenkk/zigbee2mqtt/issues/20841
+https://github.com/Koenkk/zigbee-herdsman-converters/blob/master/src/devices/tuya.ts
+https://github.com/Koenkk/zigbee2mqtt/issues/18750
+https://github.com/Koenkk/zigbee2mqtt/issues/22076
+https://github.com/Koenkk/zigbee2mqtt/issues/14369
+https://github.com/Koenkk/zigbee2mqtt/issues/5960
+https://gist.github.com/Koenkk/159904dbc760446e39091c4b14f10a9a
+
+#ZB privilege_command
+https://github.com/espressif/esp-zigbee-sdk/issues/212 
+
+#ZB genPOWER
+https://github.com/espressif/esp-zigbee-sdk/issues/77
