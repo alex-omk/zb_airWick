@@ -46,3 +46,9 @@ https://github.com/espressif/esp-zigbee-sdk/issues/212
 
 #ZB genPOWER
 https://github.com/espressif/esp-zigbee-sdk/issues/77
+
+#ZB Attribute 
+https://github.com/espressif/esp-zigbee-sdk/issues/341
+https://github.com/espressif/esp-zigbee-sdk/issues/203
+https://github.com/espressif/esp-zigbee-sdk/issues/159
+https://github.com/espressif/esp-zigbee-sdk/issues/213

@@ -136,9 +136,9 @@ esp_zb_attribute_list_t *esp_zb_create_on_off_cluster() {
 
 esp_zb_attribute_list_t *esp_zb_create_power_cfg_cluster(){
 
-  uint8_t batteryVoltage = 0x03;
+  uint8_t batteryVoltage = 0xff;
   uint8_t batterySize = 0x02;
-  uint8_t lastBatteryPercentage = 0xff;
+  uint8_t lastBatteryPercentage = 0x35;
   esp_zb_power_config_cluster_cfg_t power_cfg = {0};
 
   esp_zb_attribute_list_t *power_attr_list = esp_zb_power_config_cluster_create(&power_cfg);

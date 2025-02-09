@@ -9,6 +9,7 @@
 #include "common.h"
 #include "tools.h"
 #include "leds_status.h"
+#include "airWick.h"
 
 #ifdef USE_BATTERY_MOD
 #include "battery.h"
@@ -92,9 +93,8 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct) {
   case ESP_ZB_COMMON_SIGNAL_CAN_SLEEP:
     ESP_LOGI(TAG, "Zigbee can sleep");
 #ifdef USE_BATTERY_MOD
-    if( (millis() - last_battery_measurement_time) > MINUTES_TO_MS(READ_BATT_INTERVAL)){
-      // batterySetup();
-      // batteryReadVolts();
+    // if( (millis() - last_battery_measurement_time) > MINUTES_TO_MS(READ_BATT_INTERVAL)){
+    if( (millis() - last_battery_measurement_time) > 3000){
       batteryUpdate();
     }
 #endif
@@ -130,6 +130,7 @@ static esp_err_t zb_privileged_cmd_handler(const esp_zb_zcl_privilege_command_me
   // Check if cluster and command correspond to "ON_OFF TOGGLE" command
   if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ON_OFF && message->info.command.id == ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID) {
     ESP_LOGI(TAG, "Command PRESS");
+    airWickSpray();
 
   } else {
     ESP_LOGE(TAG, "bad command in zb_privileged_cmd_handler");
@@ -224,17 +225,6 @@ static void esp_zb_task(void *pvParameters) {
 
 }
 
-static void esp_zb_update_on_off_attr_task(void *pvParameters) {
-  while (1) {
-    uint8_t r_state = 0;
-    esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT , ESP_ZB_ZCL_CLUSTER_ID_ON_OFF, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID, &r_state, false);
-    if (status != ESP_ZB_ZCL_STATUS_SUCCESS) {
-      ESP_LOGE(TAG, "Setting ON_OFF for CH%d attribute failed!", 0);
-    }
-    vTaskDelay(100 / portTICK_PERIOD_MS);
-  }
-}
-
 bool ZbGetStatus(void) {
   return zb_connected;
 }
@@ -258,5 +248,4 @@ void ZbSetup(void) {
 
   xTaskCreate(esp_zb_task, "Zigbee_main", 4096, NULL, 5, NULL);
 
-  // xTaskCreate(esp_zb_update_on_off_attr_task, "Update_on_off_attribute_value", 4096, NULL, 4, NULL);
 }

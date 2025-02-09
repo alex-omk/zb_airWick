@@ -24,7 +24,7 @@ extern "C" {
 #include "esp_sleep.h"
 #endif
 
-#define HA_ENDPOINT 10
+#define HA_ENDPOINT 1
 
 #define MANUFACTURER_NAME "OMK"
 #define MODEL_NAME "esp32AirWick"
@@ -41,9 +41,15 @@ static const char *ModuleName = {"Air Wick"};
 #define USE_BATTERY_MOD
 #define READ_BATT_INTERVAL 2 //min
 
+#define MOTOR_UP_PIN 11
+#define MOTOR_DOWN_PIN 12
+
+#define PIN_HIGH  1
+#define PIN_LOW   0
+
 #define BTN_PIN 9
 
-#define WS2812
+// #define WS2812
 
 #ifndef WS2812
 #define LED_PIN 13

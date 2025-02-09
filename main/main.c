@@ -3,6 +3,7 @@
 #include "esp_zigbee.h"
 #include "leds_status.h"
 #include "switch_driver.h"
+#include "airWick.h"
 
 #include "tools.h"
 
@@ -20,6 +21,7 @@ static switch_func_pair_t button_func_pair[] = {
 static void zb_buttons_handler(button_event_t evt) {
   if (evt == BTN_SINGLE_CLICK) {
     ESP_LOGI(__func__, "Single_click");
+    airWickSpray();
   }
   if (evt == BTN_LONG_PRESS) {
     ESP_LOGI(__func__, "Long press, leave & reset");
@@ -61,14 +63,13 @@ void app_main(void) {
   gpio_pullup_en(BTN_PIN);
 #endif
 
-
+  airWickSetup();
   setup_NVS();
   print_chip_info();
   configure_led();
 
   ESP_ERROR_CHECK(esp_zb_power_save_init());
   ZbSetup();
-
   // xTaskCreate(led_task, "Led_status_task", 4096, NULL, 3, NULL);
 
   // #ifndef USE_SLEEP_MODE

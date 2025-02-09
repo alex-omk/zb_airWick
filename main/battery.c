@@ -4,8 +4,9 @@
 
 #include "battery.h"
 #include "ha/esp_zigbee_ha_standard.h"
-#include "tools.h"
 #include "zcl/esp_zigbee_zcl_power_config.h"
+#include "tools.h"
+#include "zb_util.h"
 
 static const char *TAG = "ESP_ZB_BATT";
 
@@ -31,6 +32,10 @@ int battery_millivolts;
 int64_t last_battery_measurement_time = 0;
 
 bool do_calibration1_chan0;
+
+
+uint8_t test_percentage = 200;
+uint8_t test_voltage = 255;
 
 void batteryUpdate(void) {
   batterySetup();
@@ -106,7 +111,12 @@ void batteryPercentage(void) {
   ESP_LOGI(TAG, "vIN: %.3f, percentage: %d", battery_voltage, percentage);
   percentage = percentage * 2; // zigbee scale
   uint8_t r_state = 0;
+  test_percentage = test_percentage - 1;
+  test_voltage = test_voltage - 1;
+  
   esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &percentage, false);
+  // esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &test_percentage, false);
+  // esp_zb_zcl_status_t status2 = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_VOLTAGE_ID, &test_voltage, false);
   if (status != ESP_ZB_ZCL_STATUS_SUCCESS) {
     ESP_LOGE(TAG, "Setting ON_OFF for CH%d attribute failed!", 0);
   }
