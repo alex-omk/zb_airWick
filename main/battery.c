@@ -28,6 +28,7 @@ adc_oneshot_unit_handle_t adc1_handle;
 int adc_raw;
 float battery_voltage;
 int battery_millivolts;
+uint8_t battery_percentage = 0xff;
 
 int64_t last_battery_measurement_time = 0;
 
@@ -79,6 +80,7 @@ void batteryReadVolts() {
   if (do_calibration1_chan0) {
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_chan0_handle, adc_avg, &battery_millivolts));
     // ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_chan0_handle, adc_raw, &battery_millivolts));
+    
     ESP_LOGI(TAG, "ADC%d Channel[%d] Cali Voltage: %d mV", ADC_UNIT_1 + 1, ADC_CHANNEL, battery_millivolts);
     battery_millivolts = battery_millivolts * 2; // divider
     battery_voltage = battery_millivolts / 1000.0;
@@ -98,24 +100,23 @@ void batteryPercentage(void) {
   // 0% 3.2v
   // 100% 4.2v
 
-  uint8_t percentage = 0;
   if (battery_voltage < 3.2) {
-    percentage = 0;
+    battery_percentage = 0;
   } else if (battery_voltage > 4.1) {
-    percentage = 100;
+    battery_percentage = 100;
   } else {
-    percentage = (uint8_t)(((battery_voltage - 3.2f) / (4.2f - 3.2f)) * 100);
+    battery_percentage = (uint8_t)(((battery_voltage - 3.2f) / (4.2f - 3.2f)) * 100);
     // percentage = (uint8_t)((battery_voltage - 3.2) * 100 / 2.5);
   }
 
-  ESP_LOGI(TAG, "vIN: %.3f, percentage: %d", battery_voltage, percentage);
-  percentage = percentage * 2; // zigbee scale
+  ESP_LOGI(TAG, "vIN: %.3f, percentage: %d", battery_voltage, battery_percentage);
+  battery_percentage = battery_percentage * 2; // zigbee scale
   uint8_t r_state = 0;
   test_percentage = test_percentage - 1;
   test_voltage = test_voltage - 1;
   
-  esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &percentage, false);
-  // esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &test_percentage, false);
+  // esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &battery_percentage, false);
+  esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &test_percentage, false);
   // esp_zb_zcl_status_t status2 = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_VOLTAGE_ID, &test_voltage, false);
   if (status != ESP_ZB_ZCL_STATUS_SUCCESS) {
     ESP_LOGE(TAG, "Setting ON_OFF for CH%d attribute failed!", 0);

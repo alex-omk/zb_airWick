@@ -3,6 +3,10 @@
 #include "zcl/esp_zigbee_zcl_power_config.h"
 #include "common.h"
 
+#ifdef USE_BATTERY_MOD
+#include "battery.h"
+#endif
+
 static const char *TAG = "ZCL_UTILITY";
 
 esp_zb_attribute_list_t *measurement_attr_cluster() {
@@ -134,18 +138,20 @@ esp_zb_attribute_list_t *esp_zb_create_on_off_cluster() {
   // return on_off_cluster;
 }
 
+#ifdef USE_BATTERY_MOD
 esp_zb_attribute_list_t *esp_zb_create_power_cfg_cluster(){
 
   uint8_t batteryVoltage = 0xff;
   uint8_t batterySize = 0x02;
-  uint8_t lastBatteryPercentage = 0x35;
+
   esp_zb_power_config_cluster_cfg_t power_cfg = {0};
 
   esp_zb_attribute_list_t *power_attr_list = esp_zb_power_config_cluster_create(&power_cfg);
 
   ESP_ERROR_CHECK(esp_zb_power_config_cluster_add_attr(power_attr_list, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_VOLTAGE_ID, &batteryVoltage));
-  ESP_ERROR_CHECK(esp_zb_power_config_cluster_add_attr(power_attr_list, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &lastBatteryPercentage));
+  ESP_ERROR_CHECK(esp_zb_power_config_cluster_add_attr(power_attr_list, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &battery_percentage));
   ESP_ERROR_CHECK(esp_zb_power_config_cluster_add_attr(power_attr_list, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_SIZE_ID, &batterySize));
 
   return power_attr_list;
 }
+#endif

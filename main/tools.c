@@ -14,19 +14,14 @@
 
 static const char *TAG = "ESP_ZB_TOOLS";
 
-char strftime_buf[64];
 
-void get_rtc_time() {
-  time_t now;
-  struct tm timeinfo;
-  time(&now);
-  localtime_r(&now, &timeinfo);
-  strftime(strftime_buf, sizeof(strftime_buf), "%a %H:%M:%S", &timeinfo);
-}
+int32_t restart_counter = 0; // value will default to 0, if not set yet in NVS
 
 int64_t IRAM_ATTR millis(){
   return (esp_timer_get_time() / 1000ULL);
 }
+
+
 
 void setup_NVS() {
   esp_err_t err = nvs_flash_init();
@@ -43,7 +38,7 @@ void setup_NVS() {
   if (err == ESP_OK) {
 
     // Read
-    int32_t restart_counter = 0; // value will default to 0, if not set yet in NVS
+    
     err = nvs_get_i32(my_handle, "restart_counter", &restart_counter);
     ESP_LOGI(__func__, "Reading restart counter from NVS ... %s", (err != ESP_OK) ? T_STATUS_FAILED : T_STATUS_DONE);
     switch (err) {
@@ -74,13 +69,12 @@ void setup_NVS() {
   }
 }
 
-int read_NVS(const char *nvs_key) {
+int32_t read_NVS(const char *nvs_key) {
   nvs_handle_t my_handle;
   esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
 
   // Read
-  // ESP_LOGI(__func__, "Reading restart counter from NVS ... ");
-  // int32_t restart_counter = 0; // value will default to 0, if not set yet in NVS
+
   int32_t value = 0;
   err = nvs_get_i32(my_handle, nvs_key, &value);
   switch (err) {
@@ -91,10 +85,10 @@ int read_NVS(const char *nvs_key) {
     ESP_LOGE(__func__, "The value is not initialized yet!");
     int value = 0;
 
-    char *substring = "_led_mode";
-    if (strstr(nvs_key, substring) != NULL) {
-      value = 1;
-    }
+    // char *substring = "_led_mode";
+    // if (strstr(nvs_key, substring) != NULL) {
+    //   value = 1;
+    // }
     err = nvs_set_i32(my_handle, nvs_key, value);
     ESP_LOGW(__func__, "Updating %s in NVS ... %s", nvs_key, (err != ESP_OK) ? T_STATUS_FAILED : T_STATUS_DONE);
     break;
@@ -126,9 +120,9 @@ bool write_NVS(const char *nvs_key, int value) {
   nvs_close(my_handle);
 
   if (err != ESP_OK) {
-    return false;
+    return ESP_FAIL;
   }
-  return true;
+  return ESP_OK;
 }
 
 void print_chip_info() {
@@ -160,22 +154,6 @@ void print_chip_info() {
            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
   ESP_LOGW(__func__, "Minimum free heap size: %" PRIu32 " bytes", esp_get_minimum_free_heap_size());
-
-  if (esp_read_mac(mac, ESP_MAC_WIFI_STA) == ESP_OK) {
-    ESP_LOGW(__func__, "Base MAC (WiFi STA): %02X:%02X:%02X:%02X:%02X:%02X",
-             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  } else if (esp_read_mac(mac, ESP_MAC_WIFI_SOFTAP) == ESP_OK) {
-    ESP_LOGW(__func__, "Base MAC (WiFi SoftAP): %02X:%02X:%02X:%02X:%02X:%02X",
-             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  } else if (esp_read_mac(mac, ESP_MAC_BT) == ESP_OK) {
-    ESP_LOGW(__func__, "Base MAC (Bluetooth): %02X:%02X:%02X:%02X:%02X:%02X",
-             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  } else if (esp_read_mac(mac, ESP_MAC_ETH) == ESP_OK) {
-    ESP_LOGW(__func__, "Base MAC (Ethernet): %02X:%02X:%02X:%02X:%02X:%02X",
-             mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  } else {
-    ESP_LOGE(__func__, "Failed to get any MAC address");
-  }
 }
 
 void heap_stats() {

@@ -14,12 +14,12 @@
 
 #define HOURS_TO_MS(hours) ((hours) * 60UL * 60UL * 1000UL)
 
-void get_rtc_time();
+extern int32_t restart_counter;
 
 int64_t IRAM_ATTR millis();
 
 void setup_NVS();
-int read_NVS(const char *nvs_key);
+int32_t read_NVS(const char *nvs_key);
 bool write_NVS(const char *nvs_key, int value);
 
 void print_chip_info();

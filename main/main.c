@@ -9,9 +9,9 @@
 
 static const char *TAG = "ESP_ZB_MAIN";
 
-#ifdef USE_BATTERY_MOD
-#include "battery.h"
-#endif
+// #ifdef USE_BATTERY_MOD
+// #include "battery.h"
+// #endif
 
 static switch_func_pair_t button_func_pair[] = {
     {BTN_PIN, BTN_EVT_CONTROL}
@@ -63,16 +63,13 @@ void app_main(void) {
   gpio_pullup_en(BTN_PIN);
 #endif
 
-  airWickSetup();
   setup_NVS();
-  print_chip_info();
+
+  
+  airWickSetup();
+  // print_chip_info();
   configure_led();
 
   ESP_ERROR_CHECK(esp_zb_power_save_init());
   ZbSetup();
-  // xTaskCreate(led_task, "Led_status_task", 4096, NULL, 3, NULL);
-
-  // #ifndef USE_SLEEP_MODE
-  //   xTaskCreate(sys_stats_task, "Sys_stats_task", 4096, NULL, 3, NULL);
-  // #endif
 }

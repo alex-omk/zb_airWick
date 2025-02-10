@@ -24,6 +24,8 @@ extern "C" {
 #include "esp_sleep.h"
 #endif
 
+static const char *ModuleName = {"Air Wick"};
+
 #define HA_ENDPOINT 1
 
 #define MANUFACTURER_NAME "OMK"
@@ -31,15 +33,12 @@ extern "C" {
 #define OTA_UPGRADE_MANUFACTURER 2810 /* The attribute indicates the file version of the downloaded image on the device*/
 #define OTA_UPGRADE_IMAGE_TYPE 4113
 
-#define FIRMWARE_VERSION 0x0000006B
-#define FW_BUILD_DATE "20250204"
+#define FIRMWARE_VERSION 0x0000006C
+#define FW_BUILD_DATE "20250210"
 
-
-
-static const char *ModuleName = {"Air Wick"};
 
 #define USE_BATTERY_MOD
-#define READ_BATT_INTERVAL 2 //min
+#define READ_BATT_INTERVAL 60 //min
 
 #define MOTOR_UP_PIN 11
 #define MOTOR_DOWN_PIN 12

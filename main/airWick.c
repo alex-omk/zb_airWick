@@ -1,9 +1,20 @@
 #include "airWick.h"
 
 #include "common.h"
+#include "tools.h"
 #include "driver/gpio.h"
 
 static const char *TAG = "ZB_AirWick";
+
+int32_t spray_counter = 0;
+
+static void airWickWriteCounter (){
+  ESP_ERROR_CHECK(write_NVS("spray_counter", spray_counter));
+}
+
+static void airWickReadCounter (){
+  spray_counter = read_NVS("spray_counter");
+}
 
 void airWickSetup(){
 
@@ -19,23 +30,30 @@ void airWickSetup(){
 
   gpio_set_level(MOTOR_UP_PIN, PIN_LOW);
   gpio_set_level(MOTOR_DOWN_PIN, PIN_LOW);
+
+  airWickReadCounter();
+  ESP_LOGW(TAG, "Spray counter = %" PRIu32, spray_counter);
 }
 
 void airWickMotorUP(){
   gpio_set_level(MOTOR_UP_PIN, PIN_HIGH);
-  vTaskDelay(pdMS_TO_TICKS(80));
+  vTaskDelay(pdMS_TO_TICKS(100));
   gpio_set_level(MOTOR_UP_PIN, PIN_LOW);
 }
 
 void airWickMotorDown(){
   gpio_set_level(MOTOR_DOWN_PIN, PIN_HIGH);
-  vTaskDelay(pdMS_TO_TICKS(150));
+  vTaskDelay(pdMS_TO_TICKS(120));
   gpio_set_level(MOTOR_DOWN_PIN, PIN_LOW);
 }
 
 void airWickSpray(){
   ESP_LOGW(TAG, "Spray");
   airWickMotorDown();
-  vTaskDelay(pdMS_TO_TICKS(50));
+  vTaskDelay(pdMS_TO_TICKS(5));
   airWickMotorUP();
+
+  spray_counter++;
+  airWickWriteCounter();
+  ESP_LOGW(TAG, "Spray counter = %" PRIu32, spray_counter);
 }

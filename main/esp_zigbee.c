@@ -94,10 +94,11 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct) {
     ESP_LOGI(TAG, "Zigbee can sleep");
 #ifdef USE_BATTERY_MOD
     // if( (millis() - last_battery_measurement_time) > MINUTES_TO_MS(READ_BATT_INTERVAL)){
-    if( (millis() - last_battery_measurement_time) > 3000){
+    if( (millis() - last_battery_measurement_time) > 25000){
       batteryUpdate();
     }
 #endif
+    airWickSpray();
     esp_zb_sleep_now();
     break;
   default:
@@ -125,7 +126,6 @@ static esp_err_t zb_attribute_handler(const esp_zb_zcl_set_attr_value_message_t 
   return ret;
 }
 
-
 static esp_err_t zb_privileged_cmd_handler(const esp_zb_zcl_privilege_command_message_t *message) {
   // Check if cluster and command correspond to "ON_OFF TOGGLE" command
   if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ON_OFF && message->info.command.id == ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID) {
@@ -137,7 +137,6 @@ static esp_err_t zb_privileged_cmd_handler(const esp_zb_zcl_privilege_command_me
   }
   return ESP_OK;
 }
-
 
 static esp_err_t zb_action_handler(esp_zb_core_action_callback_id_t callback_id, const void *message) {
 
@@ -176,7 +175,7 @@ static void esp_zb_task(void *pvParameters) {
 
   esp_zb_init(&zb_nwk_cfg);
 
-  esp_zb_sleep_set_threshold(2000);
+  esp_zb_sleep_set_threshold(200);
   
   set_zcl_string(manufacturer, MANUFACTURER_NAME);
   set_zcl_string(model, MODEL_NAME);
@@ -207,9 +206,9 @@ static void esp_zb_task(void *pvParameters) {
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_identify_cluster(esp_zb_cluster_list, esp_zb_create_identify_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_ota_cluster(esp_zb_cluster_list, esp_zb_create_ota_cluster(), ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE));
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_on_off_cluster(esp_zb_cluster_list, esp_zb_create_on_off_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
-  
+#ifdef USE_BATTERY_MOD
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_power_config_cluster(esp_zb_cluster_list,esp_zb_create_power_cfg_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
-
+#endif
   ESP_ERROR_CHECK(esp_zb_zcl_add_privilege_command(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ON_OFF, ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID));
 
 
