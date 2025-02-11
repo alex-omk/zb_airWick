@@ -24,14 +24,14 @@ const definition = {
     model: 'esp32AirWick',
     vendor: 'OMK',
     description: 'Custom FW',
-    toZigbee: [airWick],
-    fromZigbee:[fz.battery],
-    exposes: [exposes.enum('airWick', ea.SET, ['push']).withDescription('Spray action for AirWick device'), e.battery()],
+    toZigbee: [airWick, tz.factory_reset],
+    fromZigbee:[fz.battery, haDiagnostic],
+    exposes: [exposes.enum('airWick', ea.SET, ['push']).withDescription('Spray action for AirWick device'), e.battery(), e.enum('reset', ea.SET, ['reset']).withDescription("Reset spray counter")],
     // extend: [battery()],
     ota: ota.zigbeeOTA,
     configure: async (device, coordinatorEndpoint) => {
         const endpoint = device.getEndpoint(1);
-        await reporting.bind(endpoint, coordinatorEndpoint, ['genPowerCfg']);
+        await reporting.bind(endpoint, coordinatorEndpoint, ['genPowerCfg', 'haDiagnostic']);
         await reporting.batteryPercentageRemaining(endpoint);
         utils.attachOutputCluster(device, 'genOta');
     },

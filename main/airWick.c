@@ -3,6 +3,7 @@
 #include "common.h"
 #include "tools.h"
 #include "driver/gpio.h"
+#include "ha/esp_zigbee_ha_standard.h"
 
 static const char *TAG = "ZB_AirWick";
 
@@ -56,4 +57,9 @@ void airWickSpray(){
   spray_counter++;
   airWickWriteCounter();
   ESP_LOGW(TAG, "Spray counter = %" PRIu32, spray_counter);
+
+  esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, AIR_WICK_CUSTOM_CLUSTER, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, SPRAY_COUNTER_ATTR_ID, &spray_counter, false);
+  if (status != ESP_ZB_ZCL_STATUS_SUCCESS) {
+    ESP_LOGE(TAG, "Set spray counter attribute value FAIL!");
+  }
 }

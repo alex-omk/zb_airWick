@@ -14,7 +14,7 @@
 
 #define HOURS_TO_MS(hours) ((hours) * 60UL * 60UL * 1000UL)
 
-extern int32_t restart_counter;
+extern uint16_t restart_counter;
 
 int64_t IRAM_ATTR millis();
 

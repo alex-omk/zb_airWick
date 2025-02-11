@@ -38,6 +38,8 @@ esp_zb_attribute_list_t *measurement_attr_cluster();
 
 esp_zb_attribute_list_t *esp_zb_create_power_cfg_cluster();
 
+esp_zb_attribute_list_t *esp_zb_create_diagnostics_cluster();
+
 void set_zcl_string(char *buffer, char *value);
 
 /**

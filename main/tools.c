@@ -15,7 +15,7 @@
 static const char *TAG = "ESP_ZB_TOOLS";
 
 
-int32_t restart_counter = 0; // value will default to 0, if not set yet in NVS
+uint16_t restart_counter = 0; // value will default to 0, if not set yet in NVS
 
 int64_t IRAM_ATTR millis(){
   return (esp_timer_get_time() / 1000ULL);
@@ -39,11 +39,11 @@ void setup_NVS() {
 
     // Read
     
-    err = nvs_get_i32(my_handle, "restart_counter", &restart_counter);
+    err = nvs_get_u16(my_handle, "restart_counter", &restart_counter);
     ESP_LOGI(__func__, "Reading restart counter from NVS ... %s", (err != ESP_OK) ? T_STATUS_FAILED : T_STATUS_DONE);
     switch (err) {
     case ESP_OK:
-      ESP_LOGI(__func__, "Restart counter = %" PRIu32, restart_counter);
+      ESP_LOGI(__func__, "Restart counter = %" PRIu16, restart_counter);
       break;
     case ESP_ERR_NVS_NOT_FOUND:
       ESP_LOGI(__func__, "The value is not initialized yet!");
@@ -54,7 +54,7 @@ void setup_NVS() {
 
     // Write
     restart_counter++;
-    err = nvs_set_i32(my_handle, "restart_counter", restart_counter);
+    err = nvs_set_u16(my_handle, "restart_counter", restart_counter);
     ESP_LOGI(__func__, "Updating restart counter in NVS ... %s", (err != ESP_OK) ? T_STATUS_FAILED : T_STATUS_DONE);
 
     // Commit written value.

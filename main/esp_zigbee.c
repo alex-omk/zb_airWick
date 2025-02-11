@@ -57,7 +57,7 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct) {
       }
     } else {
       /* commissioning failed */
-      ESP_LOGW(TAG, "Failed to initialize Zigbee stack (status: %s)", esp_err_to_name(err_status));
+      ESP_LOGW(TAG, "Failed to initialize Zigbee stack (status: %s), restart device", esp_err_to_name(err_status));
       esp_restart();
     }
     break;
@@ -159,6 +159,12 @@ static esp_err_t zb_action_handler(esp_zb_core_action_callback_id_t callback_id,
   case ESP_ZB_CORE_CMD_DEFAULT_RESP_CB_ID:
     ESP_LOGW(TAG, "Receive Zigbee default response(0x%x) callback", callback_id);
     break;
+  case ESP_ZB_CORE_BASIC_RESET_TO_FACTORY_RESET_CB_ID:
+    ESP_LOGW(TAG, "Receive Zigbee Reset comand");
+    break;
+  case ESP_ZB_CORE_CMD_WRITE_ATTR_RESP_CB_ID:
+    ESP_LOGW(TAG, "Receive Zigbee WRITE_ATTR_RESP_CB_ID");
+    break;
   default:
     ESP_LOGW(TAG, "Receive Zigbee action(0x%x) callback", callback_id);
     break;
@@ -206,9 +212,20 @@ static void esp_zb_task(void *pvParameters) {
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_identify_cluster(esp_zb_cluster_list, esp_zb_create_identify_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_ota_cluster(esp_zb_cluster_list, esp_zb_create_ota_cluster(), ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE));
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_on_off_cluster(esp_zb_cluster_list, esp_zb_create_on_off_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_diagnostics_cluster(esp_zb_cluster_list,esp_zb_create_diagnostics_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+
 #ifdef USE_BATTERY_MOD
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_power_config_cluster(esp_zb_cluster_list,esp_zb_create_power_cfg_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 #endif
+
+  // const uint16_t spray_counter_attr_id = 0x00;
+  const uint8_t attr_type = ESP_ZB_ZCL_ATTR_TYPE_U32;
+  const uint8_t attr_access = ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY | ESP_ZB_ZCL_ATTR_ACCESS_REPORTING;
+  esp_zb_attribute_list_t *custom_air_wick_custom_attributes_list = esp_zb_zcl_attr_list_create(AIR_WICK_CUSTOM_CLUSTER);
+  ESP_ERROR_CHECK(esp_zb_custom_cluster_add_custom_attr(custom_air_wick_custom_attributes_list, SPRAY_COUNTER_ATTR_ID, attr_type, attr_access, &spray_counter));
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_custom_cluster(esp_zb_cluster_list, custom_air_wick_custom_attributes_list, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+
+
   ESP_ERROR_CHECK(esp_zb_zcl_add_privilege_command(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ON_OFF, ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID));
 
 

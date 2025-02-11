@@ -28,6 +28,9 @@ static const char *ModuleName = {"Air Wick"};
 
 #define HA_ENDPOINT 1
 
+#define AIR_WICK_CUSTOM_CLUSTER 0xFFF2
+#define SPRAY_COUNTER_ATTR_ID 0x00
+
 #define MANUFACTURER_NAME "OMK"
 #define MODEL_NAME "esp32AirWick"
 #define OTA_UPGRADE_MANUFACTURER 2810 /* The attribute indicates the file version of the downloaded image on the device*/

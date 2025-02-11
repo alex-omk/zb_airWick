@@ -2,6 +2,7 @@
 #include "esp_check.h"
 #include "zcl/esp_zigbee_zcl_power_config.h"
 #include "common.h"
+#include "tools.h"
 
 #ifdef USE_BATTERY_MOD
 #include "battery.h"
@@ -155,3 +156,12 @@ esp_zb_attribute_list_t *esp_zb_create_power_cfg_cluster(){
   return power_attr_list;
 }
 #endif
+
+esp_zb_attribute_list_t *esp_zb_create_diagnostics_cluster(){
+
+  esp_zb_diagnostics_cluster_cfg_t diagnostics_cfg;
+  esp_zb_attribute_list_t *diagnostics_attr_list = esp_zb_diagnostics_cluster_create(&diagnostics_cfg);
+  ESP_ERROR_CHECK(esp_zb_diagnostics_cluster_add_attr(diagnostics_attr_list, ESP_ZB_ZCL_ATTR_DIAGNOSTICS_NUMBER_OF_RESETS_ID, &restart_counter));
+
+  return diagnostics_attr_list;
+}
