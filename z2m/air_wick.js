@@ -14,20 +14,6 @@ const ea = exposes.access;
 
 // }; sihas_set_people
 
-// const tzLocal_AnalogCluster = {
-//     sprayInterval: {
-//         key: ["sprayInterval"],
-//         convertSet: async (entity, key, value, meta) => {
-//             const payload = {presentValue: value};
-//             const endpoint = meta.device.endpoints.find((e) => e.supportsInputCluster('genAnalogValue'));
-//             await endpoint.write('genAnalogValue', payload);
-//         },
-//         convertGet: async (entity, key, meta) => {
-//             const endpoint = meta.device.endpoints.find((e) => e.supportsInputCluster('genAnalogValue'));
-//             await endpoint.read('genAnalogValue', ['presentValue']);
-//         },
-//     },
-// };
 
 const tzLocal_AnalogCluster = {
     sprayInterval: {
@@ -57,31 +43,38 @@ const fzLocal_AnalogCluster = {
             return payload;
         },
     },
-    sprayCounter: {
+    analogInput: {
         cluster: 'genAnalogInput',
         type: ["attributeReport", 'readResponse'],
         convert: (model, msg, publish, options, meta) => {
             const payload = {};
             if (msg.data.hasOwnProperty("presentValue")) {
-                payload.sprayCounter = msg.data["presentValue"];
                 meta.logger.info(`+_+_+_ fromZigbeeConverter() msg.endpoint=[${JSON.stringify(msg.endpoint)}]`);
                 // meta.logger.debug(`+_+_+_ fromZigbeeConverter() model=[${JSON.stringify(model)}]`);
-                meta.logger.debug(`+_+_+_ fromZigbeeConverter() msg=[${JSON.stringify(msg)}]`);
+                // meta.logger.debug(`+_+_+_ fromZigbeeConverter() msg=[${JSON.stringify(msg)}]`);
+                if (msg.endpoint.ID === 1){
+                    payload.sprayCounter = msg.data["presentValue"];
+                }
+                if (msg.endpoint.ID === 11){
+                    if (msg.data["presentValue"] !== 6565){
+                        payload.batteryVoltage = msg.data["presentValue"];
+                    }
+                }
             }
             return payload;
         },
     },
-    batteryVoltage: {
-        cluster: 'genAnalogValue',
-        type: ["attributeReport", 'readResponse'],
-        convert: (model, msg, publish, options, meta) => {
-            const payload = {};
-            if (msg.data.hasOwnProperty("presentValue")) {
-                payload.batteryVoltage = msg.data["presentValue"];
-            }
-            return payload;
-        },
-    },
+    // batteryVoltage: {
+    //     cluster: 'genAnalogValue',
+    //     type: ["attributeReport", 'readResponse'],
+    //     convert: (model, msg, publish, options, meta) => {
+    //         const payload = {};
+    //         if (msg.data.hasOwnProperty("presentValue")) {
+    //             payload.batteryVoltage = msg.data["presentValue"];
+    //         }
+    //         return payload;
+    //     },
+    // },
 };
 
 const airWick ={
@@ -97,22 +90,28 @@ const definition = {
     vendor: 'OMK',
     description: 'Custom FW',
     toZigbee: [airWick, tz.factory_reset, tzLocal_AnalogCluster.sprayInterval],
-    fromZigbee:[fz.battery, fzLocal_AnalogCluster.sprayCounter, fzLocal_AnalogCluster.sprayInterval, fzLocal_AnalogCluster.batteryVoltage],
+    fromZigbee:[fz.battery, fzLocal_AnalogCluster.analogInput, fzLocal_AnalogCluster.sprayInterval,],
     meta: {multiEndpoint: true},
     exposes: [
         e.enum('airWick', ea.SET, ['Spray']).withDescription('Spray action for AirWick device'), 
         // e.battery(),
         // e.battery_voltage(), 
-        e.enum('reset', ea.SET, ['Push']).withDescription("Reset spray counter"),
-        e.numeric('sprayInterval', ea.ALL).withValueMin(0).withValueMax(100).withUnit('min').withDescription('set spray interval in minuts'),
-        e.numeric("sprayCounter", ea.STATE).withDescription("Spray counter"),
-        e.numeric("batteryVoltage", ea.STATE).withUnit('mV').withDescription("Voltage of the battery in millivolts"),
+        e.enum('reset', ea.SET, ['Push']).withDescription("Resets the spray counter"),
+        e.numeric('sprayInterval', ea.ALL)
+            .withValueMin(0)
+            .withValueMax(1440)
+            .withUnit('min')
+            .withDescription('Sets the spray interval in minutes; if set to 0, auto-spray is disabled'),
+        e.numeric("sprayCounter", ea.STATE).withDescription("Displays the total number of sprays"),
+        e.numeric("batteryVoltage", ea.STATE).withUnit('mV').withDescription("Battery voltage in millivolts"),
     ],
     extend: [battery({"percentage":true, "voltage":false, "percentageReporting":false})],
     ota: ota.zigbeeOTA,
     configure: async (device, coordinatorEndpoint, logger) => {
         const endpoint = device.getEndpoint(1);
-        await reporting.bind(endpoint, coordinatorEndpoint, ['genPowerCfg', 'genAnalogValue', 'genAnalogInput', 'genAnalogOutput']);
+        const endpoint11 = device.getEndpoint(11);
+        await reporting.bind(endpoint, coordinatorEndpoint, ['genPowerCfg', 'genAnalogInput', 'genAnalogOutput']);
+        await reporting.bind(endpoint11, coordinatorEndpoint, ['genAnalogInput',]);
         // await reporting.batteryPercentageRemaining(endpoint);
         // await endpoint.read('genPowerCfg', ['batteryVoltage']);
         // await endpoint.read('genAnalogValue', ['presentValue']);
