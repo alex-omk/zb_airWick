@@ -139,6 +139,48 @@ esp_zb_attribute_list_t *esp_zb_create_on_off_cluster() {
   // return on_off_cluster;
 }
 
+esp_zb_attribute_list_t *esp_zb_create_analog_value(int val){
+
+  // esp_zb_analog_value_cluster_cfg_t analog_value_cfg ={0};
+  esp_zb_analog_value_cluster_cfg_t analog_value_cfg ={
+    .out_of_service = true,
+    .status_flags = 1,
+    .present_value = val,
+  };
+
+  esp_zb_attribute_list_t *analog_value_attr_list = esp_zb_analog_value_cluster_create(&analog_value_cfg);
+
+  return analog_value_attr_list;
+}
+
+esp_zb_attribute_list_t *esp_zb_create_analog_input(int val){
+
+  // esp_zb_analog_input_cluster_cfg_t analog_input_cfg ={0};
+  esp_zb_analog_input_cluster_cfg_t analog_input_cfg ={
+    .out_of_service = true,
+    .status_flags = 1,
+    .present_value = val,
+  };
+
+  esp_zb_attribute_list_t *analog_input_attr_list = esp_zb_analog_input_cluster_create(&analog_input_cfg);
+
+  return analog_input_attr_list;
+}
+
+esp_zb_attribute_list_t *esp_zb_create_analog_output(int val){
+
+  // esp_zb_analog_output_cluster_cfg_t analog_output_cfg ={0};
+  esp_zb_analog_output_cluster_cfg_t analog_output_cfg ={
+    .out_of_service = true,
+    .status_flags = 1,
+    .present_value = val,
+  };
+
+  esp_zb_attribute_list_t *analog_output_attr_list = esp_zb_analog_output_cluster_create(&analog_output_cfg);
+
+  return analog_output_attr_list;
+}
+
 #ifdef USE_BATTERY_MOD
 esp_zb_attribute_list_t *esp_zb_create_power_cfg_cluster(){
 
@@ -160,8 +202,9 @@ esp_zb_attribute_list_t *esp_zb_create_power_cfg_cluster(){
 esp_zb_attribute_list_t *esp_zb_create_diagnostics_cluster(){
 
   esp_zb_diagnostics_cluster_cfg_t diagnostics_cfg;
+  uint16_t count = 0;
   esp_zb_attribute_list_t *diagnostics_attr_list = esp_zb_diagnostics_cluster_create(&diagnostics_cfg);
-  ESP_ERROR_CHECK(esp_zb_diagnostics_cluster_add_attr(diagnostics_attr_list, ESP_ZB_ZCL_ATTR_DIAGNOSTICS_NUMBER_OF_RESETS_ID, &restart_counter));
+  ESP_ERROR_CHECK(esp_zb_diagnostics_cluster_add_attr(diagnostics_attr_list, ESP_ZB_ZCL_ATTR_DIAGNOSTICS_NUMBER_OF_RESETS_ID, &count));
 
   return diagnostics_attr_list;
 }

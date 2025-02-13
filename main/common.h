@@ -28,8 +28,6 @@ static const char *ModuleName = {"Air Wick"};
 
 #define HA_ENDPOINT 1
 
-#define AIR_WICK_CUSTOM_CLUSTER 0xFFF2
-#define SPRAY_COUNTER_ATTR_ID 0x00
 
 #define MANUFACTURER_NAME "OMK"
 #define MODEL_NAME "esp32AirWick"
@@ -39,6 +37,8 @@ static const char *ModuleName = {"Air Wick"};
 #define FIRMWARE_VERSION 0x0000006C
 #define FW_BUILD_DATE "20250210"
 
+#define AIR_WICK_CUSTOM_CLUSTER 0xFFF2
+#define SPRAY_COUNTER_ATTR_ID 0x00
 
 #define USE_BATTERY_MOD
 #define READ_BATT_INTERVAL 60 //min

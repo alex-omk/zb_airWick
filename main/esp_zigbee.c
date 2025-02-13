@@ -94,11 +94,11 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct) {
     ESP_LOGI(TAG, "Zigbee can sleep");
 #ifdef USE_BATTERY_MOD
     // if( (millis() - last_battery_measurement_time) > MINUTES_TO_MS(READ_BATT_INTERVAL)){
-    if( (millis() - last_battery_measurement_time) > 25000){
+    if( (millis() - last_battery_measurement_time) > 40000){
       batteryUpdate();
+      airWickSpray();
     }
 #endif
-    airWickSpray();
     esp_zb_sleep_now();
     break;
   default:
@@ -122,6 +122,16 @@ static esp_err_t zb_attribute_handler(const esp_zb_zcl_set_attr_value_message_t 
     if (message->attribute.id == ESP_ZB_ZCL_ATTR_ON_OFF_ON_OFF_ID && message->attribute.data.type == ESP_ZB_ZCL_ATTR_TYPE_BOOL) {
       state = *(bool *)message->attribute.data.value;
     }
+  }
+  // if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ANALOG_VALUE){
+  //   float new_val = *(float *)message->attribute.data.value;
+  //   ESP_LOGW(TAG,"NEW spray interval %.2f", new_val);
+    
+  // }
+  if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ANALOG_OUTPUT && message->attribute.id == ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_PRESENT_VALUE_ID){
+    float new_val = *(float *)message->attribute.data.value;
+    ESP_LOGW(TAG,"NEW spray interval %.2f", new_val);
+    esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_OUTPUT, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_PRESENT_VALUE_ID, &new_val, false);
   }
   return ret;
 }
@@ -212,18 +222,24 @@ static void esp_zb_task(void *pvParameters) {
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_identify_cluster(esp_zb_cluster_list, esp_zb_create_identify_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_ota_cluster(esp_zb_cluster_list, esp_zb_create_ota_cluster(), ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE));
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_on_off_cluster(esp_zb_cluster_list, esp_zb_create_on_off_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
-  ESP_ERROR_CHECK(esp_zb_cluster_list_add_diagnostics_cluster(esp_zb_cluster_list,esp_zb_create_diagnostics_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_value_cluster(esp_zb_cluster_list,esp_zb_create_analog_value(3254), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_input_cluster(esp_zb_cluster_list,esp_zb_create_analog_input(spray_counter), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_output_cluster(esp_zb_cluster_list,esp_zb_create_analog_output(60), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+  
+  // ESP_ERROR_CHECK(esp_zb_cluster_list_add_diagnostics_cluster(esp_zb_cluster_list,esp_zb_create_diagnostics_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 
 #ifdef USE_BATTERY_MOD
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_power_config_cluster(esp_zb_cluster_list,esp_zb_create_power_cfg_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 #endif
 
-  // const uint16_t spray_counter_attr_id = 0x00;
   const uint8_t attr_type = ESP_ZB_ZCL_ATTR_TYPE_U32;
   const uint8_t attr_access = ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY | ESP_ZB_ZCL_ATTR_ACCESS_REPORTING;
   esp_zb_attribute_list_t *custom_air_wick_custom_attributes_list = esp_zb_zcl_attr_list_create(AIR_WICK_CUSTOM_CLUSTER);
   ESP_ERROR_CHECK(esp_zb_custom_cluster_add_custom_attr(custom_air_wick_custom_attributes_list, SPRAY_COUNTER_ATTR_ID, attr_type, attr_access, &spray_counter));
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_custom_cluster(esp_zb_cluster_list, custom_air_wick_custom_attributes_list, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+
 
 
   ESP_ERROR_CHECK(esp_zb_zcl_add_privilege_command(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ON_OFF, ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID));
