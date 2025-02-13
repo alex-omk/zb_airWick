@@ -3,11 +3,17 @@
 #include "common.h"
 #include "tools.h"
 #include "driver/gpio.h"
-#include "ha/esp_zigbee_ha_standard.h"
+#include "zb_util.h"
 
 static const char *TAG = "ZB_AirWick";
 
 int32_t spray_counter = 0;
+int16_t spray_interval = 0;
+
+int64_t last_spray_time = 0;
+
+bool autoSpray = true;
+
 
 static void airWickWriteCounter (){
   ESP_ERROR_CHECK(write_NVS("spray_counter", spray_counter));
@@ -15,6 +21,28 @@ static void airWickWriteCounter (){
 
 static void airWickReadCounter (){
   spray_counter = read_NVS("spray_counter");
+}
+
+void airWickWriteInterval(){
+  ESP_ERROR_CHECK(write_NVS("spray_interval", spray_interval));
+}
+
+void airWickClearCounter(){
+  spray_counter = 0;
+  ESP_ERROR_CHECK(write_NVS("spray_counter", spray_counter));
+}
+
+static void airWickReadInterval(){
+  if (check_NVS_key(spray_interval)){
+    spray_interval = read_NVS("spray_interval");
+    if (spray_interval == 0){
+      autoSpray = false;
+      ESP_LOGW(TAG, "Auto spray disabled");
+    }
+  } else {
+    ESP_LOGI(TAG, "Set default spray interval: %d minutes", DEFAULT_SPRAY_INTERVAL);
+    spray_interval = DEFAULT_SPRAY_INTERVAL;
+  }
 }
 
 void airWickSetup(){
@@ -34,6 +62,8 @@ void airWickSetup(){
 
   airWickReadCounter();
   ESP_LOGW(TAG, "Spray counter = %" PRIu32, spray_counter);
+
+  airWickReadInterval();
 }
 
 void airWickMotorUP(){
@@ -59,9 +89,6 @@ void airWickSpray(){
   ESP_LOGW(TAG, "Spray counter = %" PRIu32, spray_counter);
 
   float n_count = (float)spray_counter;
-  esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &n_count, false);
-  // esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, AIR_WICK_CUSTOM_CLUSTER, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, SPRAY_COUNTER_ATTR_ID, &spray_counter, false);
-  // if (status != ESP_ZB_ZCL_STATUS_SUCCESS) {
-  //   ESP_LOGE(TAG, "Set spray counter attribute value FAIL!");
-  // }
+  update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &n_count, "spray counter");
+  
 }

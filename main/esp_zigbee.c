@@ -58,7 +58,7 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct) {
     } else {
       /* commissioning failed */
       ESP_LOGW(TAG, "Failed to initialize Zigbee stack (status: %s), restart device", esp_err_to_name(err_status));
-      esp_restart();
+      // esp_restart();
     }
     break;
   case ESP_ZB_BDB_SIGNAL_STEERING:
@@ -96,6 +96,9 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct) {
     // if( (millis() - last_battery_measurement_time) > MINUTES_TO_MS(READ_BATT_INTERVAL)){
     if( (millis() - last_battery_measurement_time) > 40000){
       batteryUpdate();
+    }
+    if(autoSpray && (millis() - last_spray_time) > MINUTES_TO_MS(spray_interval)){
+      last_spray_time = millis();
       airWickSpray();
     }
 #endif
@@ -123,16 +126,19 @@ static esp_err_t zb_attribute_handler(const esp_zb_zcl_set_attr_value_message_t 
       state = *(bool *)message->attribute.data.value;
     }
   }
-  // if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ANALOG_VALUE){
-  //   float new_val = *(float *)message->attribute.data.value;
-  //   ESP_LOGW(TAG,"NEW spray interval %.2f", new_val);
-    
-  // }
+
   if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ANALOG_OUTPUT && message->attribute.id == ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_PRESENT_VALUE_ID){
-    float new_val = *(float *)message->attribute.data.value;
-    ESP_LOGW(TAG,"NEW spray interval %.2f", new_val);
-    esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_OUTPUT, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_PRESENT_VALUE_ID, &new_val, false);
+    int new_interval = *(float *)message->attribute.data.value;
+    // ESP_LOGW(TAG,"NEW spray interval %.2f", new_interval);
+    ESP_LOGW(TAG,"NEW spray interval %d", new_interval);
+    if (new_interval == 0){
+      autoSpray = false;
+    }
+    spray_interval = new_interval;
+    airWickWriteInterval();
+    // esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_OUTPUT, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_PRESENT_VALUE_ID, &new_val, false);
   }
+
   return ret;
 }
 
@@ -141,7 +147,6 @@ static esp_err_t zb_privileged_cmd_handler(const esp_zb_zcl_privilege_command_me
   if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ON_OFF && message->info.command.id == ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID) {
     ESP_LOGI(TAG, "Command PRESS");
     airWickSpray();
-
   } else {
     ESP_LOGE(TAG, "bad command in zb_privileged_cmd_handler");
   }
@@ -171,6 +176,7 @@ static esp_err_t zb_action_handler(esp_zb_core_action_callback_id_t callback_id,
     break;
   case ESP_ZB_CORE_BASIC_RESET_TO_FACTORY_RESET_CB_ID:
     ESP_LOGW(TAG, "Receive Zigbee Reset comand");
+    airWickClearCounter();
     break;
   case ESP_ZB_CORE_CMD_WRITE_ATTR_RESP_CB_ID:
     ESP_LOGW(TAG, "Receive Zigbee WRITE_ATTR_RESP_CB_ID");
@@ -223,15 +229,23 @@ static void esp_zb_task(void *pvParameters) {
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_ota_cluster(esp_zb_cluster_list, esp_zb_create_ota_cluster(), ESP_ZB_ZCL_CLUSTER_CLIENT_ROLE));
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_on_off_cluster(esp_zb_cluster_list, esp_zb_create_on_off_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 
-  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_value_cluster(esp_zb_cluster_list,esp_zb_create_analog_value(3254), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
-
-  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_input_cluster(esp_zb_cluster_list,esp_zb_create_analog_input(spray_counter), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
-  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_output_cluster(esp_zb_cluster_list,esp_zb_create_analog_output(60), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+  // ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_value_cluster(esp_zb_cluster_list,e sp_zb_create_analog_value(3254), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
   
-  // ESP_ERROR_CHECK(esp_zb_cluster_list_add_diagnostics_cluster(esp_zb_cluster_list,esp_zb_create_diagnostics_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+  /* this cluster is used to send the value of the number of sprays. */
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_input_cluster(esp_zb_cluster_list, esp_zb_create_analog_input(spray_counter), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+  
+  /* This cluster is used to adjust the spray interval. */
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_output_cluster(esp_zb_cluster_list, esp_zb_create_analog_output(spray_interval), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+  
+  // ESP_ERROR_CHECK(esp_zb_cluster_list_add_diagnostics_cluster(esp_zb_cluster_list, esp_zb_create_diagnostics_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+
+
+  /* Separate endpoint and cluster for sending battery voltage */
+  esp_zb_cluster_list_t *esp_zb_cluster_list2 = esp_zb_zcl_cluster_list_create();
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_analog_input_cluster(esp_zb_cluster_list2, esp_zb_create_analog_input(6565), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 
 #ifdef USE_BATTERY_MOD
-  ESP_ERROR_CHECK(esp_zb_cluster_list_add_power_config_cluster(esp_zb_cluster_list,esp_zb_create_power_cfg_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
+  ESP_ERROR_CHECK(esp_zb_cluster_list_add_power_config_cluster(esp_zb_cluster_list, esp_zb_create_power_cfg_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 #endif
 
   const uint8_t attr_type = ESP_ZB_ZCL_ATTR_TYPE_U32;
@@ -247,6 +261,11 @@ static void esp_zb_task(void *pvParameters) {
 
   esp_zb_ep_list_t *esp_zb_ep_list = esp_zb_ep_list_create();                  // Create endpoint list
   esp_zb_ep_list_add_ep(esp_zb_ep_list, esp_zb_cluster_list, endpoint_config); // Added cluster list to ep_list
+
+  /* EP 10    */
+  endpoint_config.endpoint = HA_ENDPOINT + 10;
+  esp_zb_ep_list_add_ep(esp_zb_ep_list, esp_zb_cluster_list2, endpoint_config);
+
 
   esp_zb_device_register(esp_zb_ep_list);
   esp_zb_core_action_handler_register(zb_action_handler);

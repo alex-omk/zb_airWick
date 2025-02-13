@@ -181,6 +181,15 @@ esp_zb_attribute_list_t *esp_zb_create_analog_output(int val){
   return analog_output_attr_list;
 }
 
+void update_attribute_value(uint8_t endpoint, uint16_t cluster_id,  uint16_t attr_id, void *value, const char *attr_name)
+{
+  esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(endpoint, cluster_id, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, attr_id, value, false);
+  if (status != ESP_ZB_ZCL_STATUS_SUCCESS)
+  {
+      ESP_LOGE(__func__, "Setting %s attribute failed!", attr_name);
+  }
+}
+
 #ifdef USE_BATTERY_MOD
 esp_zb_attribute_list_t *esp_zb_create_power_cfg_cluster(){
 

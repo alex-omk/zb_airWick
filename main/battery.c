@@ -100,31 +100,27 @@ void batteryPercentage(void) {
   // 0% 3.2v
   // 100% 4.2v
 
-  if (battery_voltage < 3.2) {
+  if (battery_voltage < BATTERY_LOW_VOLTAGE) {
     battery_percentage = 0;
-  } else if (battery_voltage > 4.1) {
+  } else if (battery_voltage > BATTERY_FULL_VOLTAGE) {
     battery_percentage = 100;
   } else {
-    battery_percentage = (uint8_t)(((battery_voltage - 3.2f) / (4.2f - 3.2f)) * 100);
+    battery_percentage = (uint8_t)(((battery_voltage - BATTERY_LOW_VOLTAGE) / (BATTERY_FULL_VOLTAGE - BATTERY_LOW_VOLTAGE)) * 100);
+    // battery_percentage = (uint8_t)(((battery_voltage - 3.2f) / (4.2f - 3.2f)) * 100);
     // percentage = (uint8_t)((battery_voltage - 3.2) * 100 / 2.5);
   }
 
   ESP_LOGI(TAG, "vIN: %.3f, percentage: %d", battery_voltage, battery_percentage);
-  battery_percentage = battery_percentage * 2; // zigbee scale
-  uint8_t r_state = 0;
+  battery_percentage = battery_percentage * 2; // zigbee scale  
+
+  // update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &battery_percentage, "battery percentage");
+  // update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &battery_voltage, "battery voltage");
+
   test_percentage = test_percentage - 1;
   test_voltage = test_voltage - 1;
-  
-  // esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &battery_percentage, false);
-  // esp_zb_zcl_status_t status2 = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_VOLTAGE_ID, &battery_voltage, false);
-  
   float voltage_val = (float)test_voltage;
-  esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_VALUE, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_ANALOG_VALUE_PRESENT_VALUE_ID, &voltage_val, false);
-  esp_zb_zcl_status_t status = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &test_percentage, false);
-  // esp_zb_zcl_status_t status2 = esp_zb_zcl_set_attribute_val(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_VOLTAGE_ID, &test_voltage, false);
-  if (status != ESP_ZB_ZCL_STATUS_SUCCESS) {
-    ESP_LOGE(TAG, "Set battery percentage attribute value FAIL!");
-  }
+  update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &test_percentage, "battery percentage");
+  update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &voltage_val, "battery voltage");
 }
 
 static void adc_calibration_deinit(adc_cali_handle_t handle) {

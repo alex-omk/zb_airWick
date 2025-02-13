@@ -69,6 +69,21 @@ void setup_NVS() {
   }
 }
 
+bool check_NVS_key(const char *nvs_key){
+  nvs_handle_t my_handle;
+  int32_t value = 0;
+  esp_err_t err;
+
+  err = nvs_open("storage", NVS_READWRITE, &my_handle);
+  err = nvs_find_key(&my_handle, nvs_key, NVS_TYPE_ANY);
+  if(err == ESP_OK){
+    return true;
+  }
+  
+  return false;
+  // err = nvs_get_i32(my_handle, nvs_key, &value);
+}
+
 int32_t read_NVS(const char *nvs_key) {
   nvs_handle_t my_handle;
   esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
@@ -83,7 +98,6 @@ int32_t read_NVS(const char *nvs_key) {
     break;
   case ESP_ERR_NVS_NOT_FOUND:
     ESP_LOGE(__func__, "The value is not initialized yet!");
-    int value = 0;
 
     // char *substring = "_led_mode";
     // if (strstr(nvs_key, substring) != NULL) {

@@ -19,6 +19,7 @@ extern uint16_t restart_counter;
 int64_t IRAM_ATTR millis();
 
 void setup_NVS();
+bool check_NVS_key(const char *nvs_key);
 int32_t read_NVS(const char *nvs_key);
 bool write_NVS(const char *nvs_key, int value);
 

@@ -46,6 +46,8 @@ esp_zb_attribute_list_t *esp_zb_create_analog_output(int val);
 
 esp_zb_attribute_list_t *esp_zb_create_diagnostics_cluster();
 
+void update_attribute_value(uint8_t endpoint, uint16_t cluster_id, uint16_t attr_id, void *value, const char *attr_name);
+
 void set_zcl_string(char *buffer, char *value);
 
 /**
