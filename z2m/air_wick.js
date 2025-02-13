@@ -113,9 +113,10 @@ const definition = {
         await reporting.bind(endpoint, coordinatorEndpoint, ['genPowerCfg', 'genAnalogInput', 'genAnalogOutput']);
         await reporting.bind(endpoint11, coordinatorEndpoint, ['genAnalogInput',]);
         // await reporting.batteryPercentageRemaining(endpoint);
-        // await endpoint.read('genPowerCfg', ['batteryVoltage']);
-        // await endpoint.read('genAnalogValue', ['presentValue']);
-        // await endpoint.read('genAnalogInput', ['presentValue']);
+        await endpoint.read('genPowerCfg', ['batteryVoltage']);
+        await endpoint.read('genAnalogValue', ['presentValue']);
+        await endpoint.read('genAnalogInput', ['presentValue']);
+        await endpoint11.read('genAnalogInput', ['presentValue']);
         utils.attachOutputCluster(device, 'genOta');
     },
 };

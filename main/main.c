@@ -51,6 +51,10 @@ void app_main(void) {
 
   ESP_LOGW(TAG, "Device model %s, FW verison 0x%x (%d) date: %s", ModuleName, FIRMWARE_VERSION, FIRMWARE_VERSION, FW_BUILD_DATE);
 
+  setup_NVS();
+  
+  airWickSetup();
+
   bool status = switch_driver_init(button_func_pair, PAIR_SIZE(button_func_pair), zb_buttons_handler);
 
   ESP_ERROR_CHECK(esp_sleep_enable_ext1_wakeup(1ULL << BTN_PIN, ESP_EXT1_WAKEUP_ANY_LOW));
@@ -63,10 +67,6 @@ void app_main(void) {
   gpio_pullup_en(BTN_PIN);
 #endif
 
-  setup_NVS();
-
-  
-  airWickSetup();
   // print_chip_info();
   configure_led();
 

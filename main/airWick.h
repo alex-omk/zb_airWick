@@ -9,7 +9,7 @@
 
 
 extern int32_t spray_counter;
-extern int16_t spray_interval;
+extern int32_t spray_interval;
 extern int64_t last_spray_time;
 
 extern bool autoSpray;

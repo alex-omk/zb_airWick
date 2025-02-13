@@ -93,8 +93,8 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct) {
   case ESP_ZB_COMMON_SIGNAL_CAN_SLEEP:
     ESP_LOGI(TAG, "Zigbee can sleep");
 #ifdef USE_BATTERY_MOD
-    // if( (millis() - last_battery_measurement_time) > MINUTES_TO_MS(READ_BATT_INTERVAL)){
-    if( (millis() - last_battery_measurement_time) > 40000){
+    // if( (millis() - last_battery_measurement_time) > 40000){
+    if( (millis() - last_battery_measurement_time) > MINUTES_TO_MS(READ_BATT_INTERVAL)){
       batteryUpdate();
     }
     if(autoSpray && (millis() - last_spray_time) > MINUTES_TO_MS(spray_interval)){
@@ -177,6 +177,8 @@ static esp_err_t zb_action_handler(esp_zb_core_action_callback_id_t callback_id,
   case ESP_ZB_CORE_BASIC_RESET_TO_FACTORY_RESET_CB_ID:
     ESP_LOGW(TAG, "Receive Zigbee Reset comand");
     airWickClearCounter();
+    float n_count = (float)spray_counter;
+    update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &n_count, "spray counter");
     break;
   case ESP_ZB_CORE_CMD_WRITE_ATTR_RESP_CB_ID:
     ESP_LOGW(TAG, "Receive Zigbee WRITE_ATTR_RESP_CB_ID");

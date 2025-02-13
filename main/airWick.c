@@ -8,7 +8,7 @@
 static const char *TAG = "ZB_AirWick";
 
 int32_t spray_counter = 0;
-int16_t spray_interval = 0;
+int32_t spray_interval = 0;
 
 int64_t last_spray_time = 0;
 
@@ -33,14 +33,14 @@ void airWickClearCounter(){
 }
 
 static void airWickReadInterval(){
-  if (check_NVS_key(spray_interval)){
+  if (check_NVS_key("spray_interval")){
     spray_interval = read_NVS("spray_interval");
     if (spray_interval == 0){
       autoSpray = false;
       ESP_LOGW(TAG, "Auto spray disabled");
     }
   } else {
-    ESP_LOGI(TAG, "Set default spray interval: %d minutes", DEFAULT_SPRAY_INTERVAL);
+    ESP_LOGW(TAG, "Set default spray interval: %d minutes", DEFAULT_SPRAY_INTERVAL);
     spray_interval = DEFAULT_SPRAY_INTERVAL;
   }
 }

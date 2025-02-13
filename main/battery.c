@@ -113,14 +113,14 @@ void batteryPercentage(void) {
   ESP_LOGI(TAG, "vIN: %.3f, percentage: %d", battery_voltage, battery_percentage);
   battery_percentage = battery_percentage * 2; // zigbee scale  
 
-  // update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &battery_percentage, "battery percentage");
-  // update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &battery_voltage, "battery voltage");
+  update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &battery_percentage, "battery percentage");
+  update_attribute_value(HA_ENDPOINT + 10, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &battery_voltage, "battery voltage");
 
-  test_percentage = test_percentage - 1;
-  test_voltage = test_voltage - 1;
-  float voltage_val = (float)test_voltage;
-  update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &test_percentage, "battery percentage");
-  update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &voltage_val, "battery voltage");
+  // test_percentage = test_percentage - 1;
+  // test_voltage = test_voltage - 1;
+  // float voltage_val = (float)test_voltage;
+  // update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &test_percentage, "battery percentage");
+  // update_attribute_value(HA_ENDPOINT + 10, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &voltage_val, "battery voltage");
 }
 
 static void adc_calibration_deinit(adc_cali_handle_t handle) {

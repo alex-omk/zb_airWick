@@ -75,13 +75,27 @@ bool check_NVS_key(const char *nvs_key){
   esp_err_t err;
 
   err = nvs_open("storage", NVS_READWRITE, &my_handle);
-  err = nvs_find_key(&my_handle, nvs_key, NVS_TYPE_ANY);
+  // if(err == ESP_OK){ESP_LOGW(TAG, "NVS_OPEN ... OK");}
+  err = nvs_get_i32(my_handle, nvs_key, &value);
+  nvs_close(my_handle);
+
+  if(err == ESP_ERR_NVS_NOT_FOUND){ESP_LOGE(__func__, "The value %s is not initialized yet!", nvs_key);}
   if(err == ESP_OK){
     return true;
   }
   
   return false;
-  // err = nvs_get_i32(my_handle, nvs_key, &value);
+  // nvs_handle_t my_handle;
+  // int32_t value = 0;
+  // esp_err_t err;
+
+  // err = nvs_open("storage", NVS_READWRITE, &my_handle);
+  // err = nvs_find_key(&my_handle, nvs_key, NVS_TYPE_ANY);
+  // if(err == ESP_OK){
+  //   return true;
+  // }
+  
+  // return false;
 }
 
 int32_t read_NVS(const char *nvs_key) {
