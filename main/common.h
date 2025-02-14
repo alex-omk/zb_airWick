@@ -34,19 +34,17 @@ static const char *ModuleName = {"Air Wick"};
 #define OTA_UPGRADE_MANUFACTURER 2810 /* The attribute indicates the file version of the downloaded image on the device*/
 #define OTA_UPGRADE_IMAGE_TYPE 4113
 
-#define FIRMWARE_VERSION 0x0000006D
-#define FW_BUILD_DATE "20250213"
+#define FIRMWARE_VERSION 0x0000006E
+#define FW_BUILD_DATE "20250214"
 
-#define AIR_WICK_CUSTOM_CLUSTER 0xFFF2
-#define SPRAY_COUNTER_ATTR_ID 0x00
 
 #define USE_BATTERY_MOD
 #define READ_BATT_INTERVAL 60 //min
 
-#define DEFAULT_SPRAY_INTERVAL 120 //min
-
 #define BATTERY_FULL_VOLTAGE  4.2
 #define BATTERY_LOW_VOLTAGE   3.2
+
+#define DEFAULT_SPRAY_INTERVAL 120 //min
 
 
 #define MOTOR_UP_PIN 11

@@ -35,9 +35,6 @@ int64_t last_battery_measurement_time = 0;
 bool do_calibration1_chan0;
 
 
-uint8_t test_percentage = 200;
-uint8_t test_voltage = 255;
-
 void batteryUpdate(void) {
   batterySetup();
   batteryReadVolts();
@@ -79,11 +76,12 @@ void batteryReadVolts() {
 
   if (do_calibration1_chan0) {
     ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_chan0_handle, adc_avg, &battery_millivolts));
-    // ESP_ERROR_CHECK(adc_cali_raw_to_voltage(adc1_cali_chan0_handle, adc_raw, &battery_millivolts));
     
     ESP_LOGI(TAG, "ADC%d Channel[%d] Cali Voltage: %d mV", ADC_UNIT_1 + 1, ADC_CHANNEL, battery_millivolts);
     battery_millivolts = battery_millivolts * 2; // divider
-    battery_voltage = battery_millivolts / 1000.0;
+    
+    // battery_voltage = battery_millivolts / 1000.0;
+    battery_voltage = roundf(battery_millivolts / 100.0) / 10.0;
 
     last_battery_measurement_time = millis();
     ESP_LOGW(TAG, "LAST READ BATT %d millis", (int)last_battery_measurement_time);
@@ -113,14 +111,9 @@ void batteryPercentage(void) {
   ESP_LOGI(TAG, "vIN: %.3f, percentage: %d", battery_voltage, battery_percentage);
   battery_percentage = battery_percentage * 2; // zigbee scale  
 
+  float voltage_to_send = (float)battery_millivolts;
   update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &battery_percentage, "battery percentage");
-  update_attribute_value(HA_ENDPOINT + 10, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &battery_voltage, "battery voltage");
-
-  // test_percentage = test_percentage - 1;
-  // test_voltage = test_voltage - 1;
-  // float voltage_val = (float)test_voltage;
-  // update_attribute_value(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_POWER_CONFIG, ESP_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID, &test_percentage, "battery percentage");
-  // update_attribute_value(HA_ENDPOINT + 10, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &voltage_val, "battery voltage");
+  update_attribute_value(HA_ENDPOINT + 10, ESP_ZB_ZCL_CLUSTER_ID_ANALOG_INPUT, ESP_ZB_ZCL_ATTR_ANALOG_INPUT_PRESENT_VALUE_ID, &voltage_to_send, "battery voltage");
 }
 
 static void adc_calibration_deinit(adc_cali_handle_t handle) {

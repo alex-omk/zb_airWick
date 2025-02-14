@@ -84,18 +84,15 @@ static void switch_driver_button_detected(void *arg)
             switch_driver_gpios_intr_enabled(false);
             evt_flag = true;
             start_evt_time = esp_timer_get_time();
-            ESP_LOGW(TAG, "EVT START TIME!!!!");
         }
         while (evt_flag) {
             bool value = gpio_get_level(io_num);
             switch (switch_state) {
             case SWITCH_IDLE:
                 switch_state = (value == GPIO_INPUT_LEVEL_ON) ? SWITCH_PRESS_DETECTED : SWITCH_IDLE;
-                ESP_LOGW(TAG, "THIS IDLE");
                 break;
             case SWITCH_PRESS_DETECTED:
                 switch_state = (value == GPIO_INPUT_LEVEL_ON) ? SWITCH_PRESS_DETECTED : SWITCH_RELEASE_DETECTED;
-                // ESP_LOGW(TAG, "THIS PRESS_DETECTED");
                 break;
             case SWITCH_RELEASE_DETECTED:
                 if (((esp_timer_get_time() - start_evt_time) / 1000ULL) > 1000){
@@ -103,7 +100,6 @@ static void switch_driver_button_detected(void *arg)
                 } else {
                     (*func_ptr)(BTN_SINGLE_CLICK);
                 }
-                // ESP_LOGW(TAG, "THIS SWITCH_RELEASE_DETECTED, go to CB");
                 switch_state = SWITCH_IDLE;
                 start_evt_time = 0;
                 

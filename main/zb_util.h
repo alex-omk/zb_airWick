@@ -16,8 +16,6 @@ extern "C" {
 
 #define ESP_ZB_POWER_SOURCE_DC 3
 
-#define ELECTRICAL_MEASUREMENT_RMS_VOLTAGE  0x0000                  /* < Default value from specification */
-#define ELECTRICAL_MEASUREMENT_RMS_CURRENT  0x0000                  /* < Default value from specification */
 
 /** optional basic manufacturer information */
 typedef struct zcl_basic_manufacturer_info_s {

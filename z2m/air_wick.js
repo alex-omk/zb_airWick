@@ -12,8 +12,6 @@ const reporting = require('zigbee-herdsman-converters/lib/reporting');
 const e = exposes.presets;
 const ea = exposes.access;
 
-// }; sihas_set_people
-
 
 const tzLocal_AnalogCluster = {
     sprayInterval: {
@@ -49,7 +47,7 @@ const fzLocal_AnalogCluster = {
         convert: (model, msg, publish, options, meta) => {
             const payload = {};
             if (msg.data.hasOwnProperty("presentValue")) {
-                meta.logger.info(`+_+_+_ fromZigbeeConverter() msg.endpoint=[${JSON.stringify(msg.endpoint)}]`);
+                // meta.logger.info(`+_+_+_ fromZigbeeConverter() msg.endpoint=[${JSON.stringify(msg.endpoint)}]`);
                 // meta.logger.debug(`+_+_+_ fromZigbeeConverter() model=[${JSON.stringify(model)}]`);
                 // meta.logger.debug(`+_+_+_ fromZigbeeConverter() msg=[${JSON.stringify(msg)}]`);
                 if (msg.endpoint.ID === 1){
@@ -64,17 +62,6 @@ const fzLocal_AnalogCluster = {
             return payload;
         },
     },
-    // batteryVoltage: {
-    //     cluster: 'genAnalogValue',
-    //     type: ["attributeReport", 'readResponse'],
-    //     convert: (model, msg, publish, options, meta) => {
-    //         const payload = {};
-    //         if (msg.data.hasOwnProperty("presentValue")) {
-    //             payload.batteryVoltage = msg.data["presentValue"];
-    //         }
-    //         return payload;
-    //     },
-    // },
 };
 
 const airWick ={
@@ -94,8 +81,6 @@ const definition = {
     meta: {multiEndpoint: true},
     exposes: [
         e.enum('airWick', ea.SET, ['Spray']).withDescription('Spray action for AirWick device'), 
-        // e.battery(),
-        // e.battery_voltage(), 
         e.enum('reset', ea.SET, ['Push']).withDescription("Resets the spray counter"),
         e.numeric('sprayInterval', ea.ALL)
             .withValueMin(0)
@@ -113,23 +98,12 @@ const definition = {
         await reporting.bind(endpoint, coordinatorEndpoint, ['genPowerCfg', 'genAnalogInput', 'genAnalogOutput']);
         await reporting.bind(endpoint11, coordinatorEndpoint, ['genAnalogInput',]);
         // await reporting.batteryPercentageRemaining(endpoint);
-        await endpoint.read('genPowerCfg', ['batteryVoltage']);
-        await endpoint.read('genAnalogValue', ['presentValue']);
-        await endpoint.read('genAnalogInput', ['presentValue']);
-        await endpoint11.read('genAnalogInput', ['presentValue']);
+        // await endpoint.read('genPowerCfg', ['batteryVoltage']);
+        // await endpoint.read('genAnalogValue', ['presentValue']);
+        // await endpoint.read('genAnalogInput', ['presentValue']);
+        // await endpoint11.read('genAnalogInput', ['presentValue']);
         utils.attachOutputCluster(device, 'genOta');
     },
 };
 
 module.exports = definition;
-
-
-// const payloadDiagnostic = [
-//     {
-//         attribute: 'numberOfResets',
-//         minimumReportInterval: 5,
-//         maximumReportInterval: 60,
-//         reportableChange: 0,
-//     }
-// ];
-// // await endpoint.configureReporting('haDiagnostic', payloadDiagnostic);

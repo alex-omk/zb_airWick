@@ -93,7 +93,7 @@ void esp_zb_app_signal_handler(esp_zb_app_signal_t *signal_struct) {
   case ESP_ZB_COMMON_SIGNAL_CAN_SLEEP:
     ESP_LOGI(TAG, "Zigbee can sleep");
 #ifdef USE_BATTERY_MOD
-    // if( (millis() - last_battery_measurement_time) > 40000){
+    // if( (millis() - last_battery_measurement_time) > 30000){
     if( (millis() - last_battery_measurement_time) > MINUTES_TO_MS(READ_BATT_INTERVAL)){
       batteryUpdate();
     }
@@ -129,7 +129,7 @@ static esp_err_t zb_attribute_handler(const esp_zb_zcl_set_attr_value_message_t 
 
   if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ANALOG_OUTPUT && message->attribute.id == ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_PRESENT_VALUE_ID){
     int new_interval = *(float *)message->attribute.data.value;
-    // ESP_LOGW(TAG,"NEW spray interval %.2f", new_interval);
+    
     ESP_LOGW(TAG,"NEW spray interval %d", new_interval);
     if (new_interval == 0){
       autoSpray = false;
@@ -145,7 +145,7 @@ static esp_err_t zb_attribute_handler(const esp_zb_zcl_set_attr_value_message_t 
 static esp_err_t zb_privileged_cmd_handler(const esp_zb_zcl_privilege_command_message_t *message) {
   // Check if cluster and command correspond to "ON_OFF TOGGLE" command
   if (message->info.cluster == ESP_ZB_ZCL_CLUSTER_ID_ON_OFF && message->info.command.id == ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID) {
-    ESP_LOGI(TAG, "Command PRESS");
+    ESP_LOGI(TAG, "Spray command received");
     airWickSpray();
   } else {
     ESP_LOGE(TAG, "bad command in zb_privileged_cmd_handler");
@@ -249,14 +249,6 @@ static void esp_zb_task(void *pvParameters) {
 #ifdef USE_BATTERY_MOD
   ESP_ERROR_CHECK(esp_zb_cluster_list_add_power_config_cluster(esp_zb_cluster_list, esp_zb_create_power_cfg_cluster(), ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
 #endif
-
-  const uint8_t attr_type = ESP_ZB_ZCL_ATTR_TYPE_U32;
-  const uint8_t attr_access = ESP_ZB_ZCL_ATTR_ACCESS_READ_ONLY | ESP_ZB_ZCL_ATTR_ACCESS_REPORTING;
-  esp_zb_attribute_list_t *custom_air_wick_custom_attributes_list = esp_zb_zcl_attr_list_create(AIR_WICK_CUSTOM_CLUSTER);
-  ESP_ERROR_CHECK(esp_zb_custom_cluster_add_custom_attr(custom_air_wick_custom_attributes_list, SPRAY_COUNTER_ATTR_ID, attr_type, attr_access, &spray_counter));
-  ESP_ERROR_CHECK(esp_zb_cluster_list_add_custom_cluster(esp_zb_cluster_list, custom_air_wick_custom_attributes_list, ESP_ZB_ZCL_CLUSTER_SERVER_ROLE));
-
-
 
   ESP_ERROR_CHECK(esp_zb_zcl_add_privilege_command(HA_ENDPOINT, ESP_ZB_ZCL_CLUSTER_ID_ON_OFF, ESP_ZB_ZCL_CMD_ON_OFF_TOGGLE_ID));
 

@@ -156,8 +156,7 @@ bool write_NVS(const char *nvs_key, int value) {
 void print_chip_info() {
   esp_chip_info_t chip_info;
   uint32_t flash_size;
-  uint8_t mac[6];
-
+  
   esp_chip_info(&chip_info);
 
   ESP_LOGW(__func__, "This is %s chip with %d CPU core(s), %s%s%s%s, ",
