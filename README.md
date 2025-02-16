@@ -60,6 +60,7 @@ Once the device is paired successfully, make sure to check the **Bind** tab. The
 <p align="left"> <img src="docs/images/z2m_bind.png" width="900"></p>
 Additionally, check the **Reports** tab and ensure that all reports are disabled.
 <p align="left"> <img src="docs/images/z2m_reporting.png" width="900"></p>
+
 ## License
 This project is open-source and distributed under the **MIT License**.
 
