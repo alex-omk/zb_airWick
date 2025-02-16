@@ -47,7 +47,7 @@ static const char *ModuleName = {"Air Wick"};
 #define DEFAULT_SPRAY_INTERVAL 120 //min
 
 
-#define MOTOR_UP_PIN 11
+#define MOTOR_UP_PIN 11  //YELLOW
 #define MOTOR_DOWN_PIN 12
 
 #define PIN_HIGH  1

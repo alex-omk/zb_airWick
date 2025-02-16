@@ -199,7 +199,7 @@ static void esp_zb_task(void *pvParameters) {
 
   esp_zb_init(&zb_nwk_cfg);
 
-  esp_zb_sleep_set_threshold(200);
+  esp_zb_sleep_set_threshold(400);
   
   set_zcl_string(manufacturer, MANUFACTURER_NAME);
   set_zcl_string(model, MODEL_NAME);

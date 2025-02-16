@@ -74,7 +74,7 @@ void airWickMotorUP(){
 
 void airWickMotorDown(){
   gpio_set_level(MOTOR_DOWN_PIN, PIN_HIGH);
-  vTaskDelay(pdMS_TO_TICKS(120));
+  vTaskDelay(pdMS_TO_TICKS(180));
   gpio_set_level(MOTOR_DOWN_PIN, PIN_LOW);
 }
 
