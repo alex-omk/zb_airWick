@@ -21,11 +21,19 @@ This project aims to customize and integrate an **Air Wick air freshener** into 
 ## Modifications
 A detailed guide on disassembling the Air Wick device and making the necessary modifications can be found **[here](docs/airwick_mod.md)**.
 
-## Installation
+## Notes  
+
+- Since the device operates in **sleep mode**, there may be a delay of **up to 10 seconds** before executing the spray command after it is sent.  
+- By default, the spray interval is set to **120 minutes**. You can change this value in the **Exposes** tab in **zigbee2mqtt**. Setting the value to **0** disables automatic spraying.  
+- The battery status report is sent **once per hour**.  
+- The **Reset** command in the **Exposes** tab is used to reset the spray counter.  
+- Holding the **BOOT** button for approximately **1.5 seconds** will reset the device and put it into pairing mode.  
+
 ## Build
 
-
 This project can be built with the [ESP-IDF build system](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html)
+
+To compile the firmware, **ESP-IDF v5.3.2** is required. Make sure you have the correct version installed before building the project.
 
 Configure:
 
@@ -35,11 +43,12 @@ Build:
 
     idf.py build
 
-Flash::
+Flash:
 
     idf.py flash
 
-### Zigbee2MQTT
+## Zigbee2MQTT
+
 This project is supported via an **external converter**. To integrate it into **Zigbee2MQTT**, follow these steps:
 
 ```bash
@@ -56,8 +65,15 @@ external_converters:
 
 Save the file and restart **Zigbee2MQTT** to apply changes.
 
+## Exposes
+<p align="left"> <img src="docs/images/z2m_exposes.png" width="900"></p>
+
+## Bind
 Once the device is paired successfully, make sure to check the **Bind** tab. The settings should appear as shown in the screenshot.  
 <p align="left"> <img src="docs/images/z2m_bind.png" width="900"></p>
+
+## Reporting
+
 Additionally, check the **Reports** tab and ensure that all reports are disabled.
 <p align="left"> <img src="docs/images/z2m_reporting.png" width="900"></p>
 
