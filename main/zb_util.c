@@ -119,7 +119,13 @@ esp_zb_attribute_list_t *esp_zb_create_analog_output(int val){
     .present_value = val,
   };
 
+  uint16_t min_present_val = 0;
+  uint16_t max_present_val = 65535;
+  uint16_t resolution_val = 65535;
   esp_zb_attribute_list_t *analog_output_attr_list = esp_zb_analog_output_cluster_create(&analog_output_cfg);
+  ESP_ERROR_CHECK(esp_zb_analog_output_cluster_add_attr(analog_output_attr_list, ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_MIN_PRESENT_VALUE_ID, &min_present_val));
+  ESP_ERROR_CHECK(esp_zb_analog_output_cluster_add_attr(analog_output_attr_list, ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_MAX_PRESENT_VALUE_ID, &max_present_val));
+  ESP_ERROR_CHECK(esp_zb_analog_output_cluster_add_attr(analog_output_attr_list, ESP_ZB_ZCL_ATTR_ANALOG_OUTPUT_RESOLUTION_ID , &resolution_val));
 
   return analog_output_attr_list;
 }
