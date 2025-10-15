@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version_number=110
+version_number=111
 current_date=$(date +%Y%m%d)
 
 hex_version=$(printf "%08X" $version_number)

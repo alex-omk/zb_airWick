@@ -47,6 +47,27 @@ Flash:
 
     idf.py flash
 
+## OTA
+The project supports Over-the-Air (OTA) updates.
+For setup instructions, please refer to the official [Zigbee2MQTT](https://www.zigbee2mqtt.io/guide/usage/ota_updates.html#local-ota-index-and-firmware-files) documentation.
+
+>   ⚠️ **Note:** The OTA update process is very slow — it usually takes **around 40–50 minutes** to complete.
+>   It is **not recommended** to start the update if the battery charge is below 60%.
+
+my_index.json
+```bash
+[
+    ....
+  {
+    "url": "ota_img/zb-airWick.ota",
+    "force": true,
+    "imageType": 4113,
+    "manufactureCode": 2810
+  },
+    ....
+]
+```
+
 ## Zigbee2MQTT
 
 This project is supported via an **external converter**. To integrate it into **Zigbee2MQTT**, follow these steps:

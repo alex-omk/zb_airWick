@@ -2,6 +2,8 @@ const {deviceEndpoints, identify, battery} = require("zigbee-herdsman-converters
 
 const fz = require('zigbee-herdsman-converters/converters/fromZigbee');
 const tz = require('zigbee-herdsman-converters/converters/toZigbee');
+// const m = require("zigbee-herdsman-converters/lib/modernExtend");
+const ota = require("zigbee-herdsman-converters/lib/ota");
 const utils = require("zigbee-herdsman-converters/lib/utils");
 const globalStore = require("zigbee-herdsman-converters/lib/store");
 const exposes = require('zigbee-herdsman-converters/lib/exposes');
@@ -45,6 +47,9 @@ const fzLocal_AnalogCluster = {
         convert: (model, msg, publish, options, meta) => {
             const payload = {};
             if (msg.data.hasOwnProperty("presentValue")) {
+                // meta.logger.info(`+_+_+_ fromZigbeeConverter() msg.endpoint=[${JSON.stringify(msg.endpoint)}]`);
+                // meta.logger.debug(`+_+_+_ fromZigbeeConverter() model=[${JSON.stringify(model)}]`);
+                // meta.logger.debug(`+_+_+_ fromZigbeeConverter() msg=[${JSON.stringify(msg)}]`);
                 if (msg.endpoint.ID === 1){
                     payload.sprayCounter = msg.data["presentValue"];
                 }
@@ -86,12 +91,18 @@ const definition = {
         e.numeric("batteryVoltage", ea.STATE).withUnit('mV').withDescription("Battery voltage in millivolts"),
     ],
     extend: [battery({"percentage":true, "voltage":false, "percentageReporting":false})],
-    ota: true,
+    ota: ota.zigbeeOTA,
     configure: async (device, coordinatorEndpoint, logger) => {
         const endpoint = device.getEndpoint(1);
         const endpoint11 = device.getEndpoint(11);
         await reporting.bind(endpoint, coordinatorEndpoint, ['genPowerCfg', 'genAnalogInput', 'genAnalogOutput']);
         await reporting.bind(endpoint11, coordinatorEndpoint, ['genAnalogInput',]);
+        // await reporting.batteryPercentageRemaining(endpoint);
+        // await endpoint.read('genPowerCfg', ['batteryVoltage']);
+        // await endpoint.read('genAnalogValue', ['presentValue']);
+        // await endpoint.read('genAnalogInput', ['presentValue']);
+        // await endpoint11.read('genAnalogInput', ['presentValue']);
+        utils.attachOutputCluster(device, 'genOta');
     },
 };
 

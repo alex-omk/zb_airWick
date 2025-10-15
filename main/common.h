@@ -42,7 +42,7 @@ static const char *ModuleName = {"Air Wick"};
 #define READ_BATT_INTERVAL 60 //min
 
 #define BATTERY_FULL_VOLTAGE  4.2
-#define BATTERY_LOW_VOLTAGE   3.2
+#define BATTERY_LOW_VOLTAGE   2.7
 
 #define DEFAULT_SPRAY_INTERVAL 120 //min
 
